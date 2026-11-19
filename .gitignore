@@ -1,0 +1,5 @@
+data/
+__pycache__/
+*.pyc
+.env
+tests/test_input.mp4

@@ -1,0 +1,9 @@
+fastapi>=0.110
+uvicorn[standard]>=0.29
+python-multipart>=0.0.9
+rapidocr_onnxruntime>=1.2.3
+opencv-python-headless>=4.9
+pillow>=10.0
+numpy>=1.26
+anthropic>=2.10
+rapidfuzz>=3.0
