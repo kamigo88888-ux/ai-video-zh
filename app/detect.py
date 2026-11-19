@@ -146,7 +146,8 @@ class Track:
 def run_ocr(img: np.ndarray, scale_back: float) -> list[Line]:
     res, _ = get_ocr()(img)
     lines: list[Line] = []
-    for box, text, score in res or []:
+    for item in res or []:
+        box, text, score = item[0], item[1], item[2]   # newer rapidocr may append word boxes
         score = float(score)
         text = text.strip()
         if score < MIN_SCORE or len(LATIN.findall(text)) < 2:
