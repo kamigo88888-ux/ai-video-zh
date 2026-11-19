@@ -36,29 +36,38 @@ DEFAULT_STYLE = {
     "bg_opacity": 0.55,
 }
 
+_NOTO = "/usr/share/fonts/opentype/noto/"
+_WIN = "C:/Windows/Fonts/"
 _FONT_FILES = {
-    "bold": ["/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"],
-    "black": ["/usr/share/fonts/opentype/noto/NotoSansCJK-Black.ttc", "/usr/share/fonts/opentype/noto/NotoSansCJK-Bold.ttc"],
-    "regular": ["/usr/share/fonts/opentype/noto/NotoSansCJK-Medium.ttc", "/usr/share/fonts/opentype/noto/NotoSansCJK-Regular.ttc"],
+    "bold": [_NOTO + "NotoSansCJK-Bold.ttc", _WIN + "msjhbd.ttc", "/System/Library/Fonts/PingFang.ttc"],
+    "black": [_NOTO + "NotoSansCJK-Black.ttc", _NOTO + "NotoSansCJK-Bold.ttc", _WIN + "msjhbd.ttc",
+              "/System/Library/Fonts/PingFang.ttc"],
+    "regular": [_NOTO + "NotoSansCJK-Medium.ttc", _NOTO + "NotoSansCJK-Regular.ttc", _WIN + "msjh.ttc",
+                "/System/Library/Fonts/PingFang.ttc"],
 }
-_FALLBACK = ["/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc"]
+_FALLBACK = ["/usr/share/fonts/truetype/wqy/wqy-zenhei.ttc", _WIN + "msjhbd.ttc", _WIN + "msjh.ttc",
+             _WIN + "mingliu.ttc"]
 
 
 @functools.lru_cache(maxsize=None)
 def _font_source(kind: str) -> tuple[str, int]:
-    files = _FONT_FILES.get(kind, _FONT_FILES["bold"]) + sorted(glob.glob("/usr/share/fonts/**/NotoSansCJK*Bold*", recursive=True)) + _FALLBACK
+    """Find a Traditional-Chinese capable font (Linux Noto CJK, Windows 微軟正黑體, macOS 蘋方)."""
+    files = (_FONT_FILES.get(kind, _FONT_FILES["bold"]) +
+             sorted(glob.glob("/usr/share/fonts/**/NotoSansCJK*Bold*", recursive=True)) + _FALLBACK)
     for path in files:
         try:
-            for idx in range(10):
-                f = ImageFont.truetype(path, 20, index=idx)
-                fam, _ = f.getname()
-                if "TC" in fam:
-                    return path, idx
-            ImageFont.truetype(path, 20)
-            return path, 0
+            ImageFont.truetype(path, 20, index=0)
         except OSError:
             continue
-    raise RuntimeError("找不到中文字型，請安裝 fonts-noto-cjk")
+        for idx in range(12):        # inside a .ttc prefer the TC (Traditional Chinese) face
+            try:
+                fam, _ = ImageFont.truetype(path, 20, index=idx).getname()
+            except OSError:
+                break
+            if "TC" in fam or ("PingFang" in fam and "TC" in fam):
+                return path, idx
+        return path, 0
+    raise RuntimeError("找不到中文字型：Linux 請安裝 fonts-noto-cjk；Windows 需有微軟正黑體（msjh）")
 
 
 @functools.lru_cache(maxsize=256)

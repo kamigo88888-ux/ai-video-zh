@@ -109,7 +109,7 @@ def thumb(jid: str):
 @app.get("/api/jobs/{jid}/output")
 def output(jid: str, download: int = 0):
     j = _job(jid)
-    p = jobs.job_dir(jid) / "output.mp4"
+    p = jobs.output_path(j)
     if not p.exists():
         raise HTTPException(404, "尚未輸出")
     name = Path(j["name"]).stem + "_中文版.mp4"
@@ -199,7 +199,7 @@ def batch_download(ids: str):
     files = []
     for jid in ids.split(","):
         j = jobs.get(jid)
-        p = jobs.job_dir(jid) / "output.mp4" if j else None
+        p = jobs.output_path(j) if j else None
         if p and p.exists():
             files.append((p, Path(j["name"]).stem + "_中文版.mp4"))
     if not files:
@@ -216,6 +216,32 @@ def batch_download(ids: str):
     buf.seek(0)
     return StreamingResponse(buf, media_type="application/zip",
                              headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote('中文化影片.zip')}"})
+
+
+# ------------------------------------------------------------- info
+
+def _lan_ips() -> list[str]:
+    import socket
+    ips = set()
+    try:
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("10.255.255.255", 1))      # no packet is sent; picks the LAN interface
+        ips.add(s.getsockname()[0])
+        s.close()
+    except OSError:
+        pass
+    try:
+        for ip in socket.gethostbyname_ex(socket.gethostname())[2]:
+            ips.add(ip)
+    except OSError:
+        pass
+    return sorted(ip for ip in ips if not ip.startswith("127."))
+
+
+@app.get("/api/info")
+def info(request: Request):
+    port = request.url.port or 8000
+    return {"lan_urls": [f"http://{ip}:{port}" for ip in _lan_ips()]}
 
 
 # ------------------------------------------------------------- settings

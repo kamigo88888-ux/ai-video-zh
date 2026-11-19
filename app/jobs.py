@@ -260,9 +260,21 @@ def _task_render(jid: str, args: dict):
     st = settings.load()
     render(str(d / job["input"]), str(tmp), info, lay, crf=int(st.get("crf", 16)), preset=st.get("preset", "medium"),
            progress=_progress(jid, 0.0, 1.0))
-    tmp.replace(d / "output.mp4")
+    name = f"output_v{job.get('version', 0)}_{int(time.time())}.mp4"
+    tmp.replace(d / name)
+    old = job.get("output_file")
     update(jid, status="done", progress=1.0, message="輸出完成，可下載", has_output=True,
-           rendered_version=job.get("version", 0))
+           rendered_version=job.get("version", 0), output_file=name)
+    for p in d.glob("output*.mp4"):          # best effort: old file may still be open on Windows
+        if p.name not in (name, tmp.name):
+            try:
+                p.unlink()
+            except OSError:
+                pass
+
+
+def output_path(job: dict) -> Path:
+    return job_dir(job["id"]) / job.get("output_file", "output.mp4")
 
 
 TASKS = {"analyze": _task_analyze, "translate": _task_translate, "render": _task_render}

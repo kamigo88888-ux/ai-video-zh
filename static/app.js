@@ -411,5 +411,6 @@ async function saveSettings() {
 }
 
 /* boot */
+api('/api/info').then(d => { if (d.lan_urls.length) $('#lanUrl').textContent = '同事連線：' + d.lan_urls.join('  '); }).catch(() => {});
 const m = location.hash.match(/job=([\w-]+)/);
 if (m) openEditor(m[1]); else refreshList();
