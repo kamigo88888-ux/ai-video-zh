@@ -10,7 +10,8 @@ sudo apt-get install -y ffmpeg fonts-noto-cjk fonts-noto-cjk-extra
 # 2. 安裝 Python 套件（Python 3.10+）
 pip install -r requirements.txt
 # 3. 設定 Claude API 金鑰（擇一）：環境變數，或啟動後在網頁「⚙ 設定」輸入
-export ANTHROPIC_API_KEY=sk-ant-...
+export SUBZH_ANTHROPIC_API_KEY=sk-ant-...   # 也接受 ANTHROPIC_API_KEY
+#    在 Claude Code 雲端環境請用 SUBZH_ANTHROPIC_API_KEY（ANTHROPIC_API_KEY 可能被平台保留）
 # 4. 啟動
 ./run.sh            # 預設 http://0.0.0.0:8000 ，可用 PORT=9000 ./run.sh 改埠
 ```

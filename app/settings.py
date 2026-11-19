@@ -56,8 +56,20 @@ def save(updates: dict) -> dict:
     return d
 
 
+# SUBZH_ANTHROPIC_API_KEY is checked first: in hosted environments (e.g. Claude Code
+# cloud sessions) ANTHROPIC_API_KEY may be reserved for the host and not reach programs.
+ENV_KEY_NAMES = ("SUBZH_ANTHROPIC_API_KEY", "ANTHROPIC_API_KEY")
+
+
+def api_key_from_env() -> str:
+    for name in ENV_KEY_NAMES:
+        if os.environ.get(name, "").strip():
+            return os.environ[name].strip()
+    return ""
+
+
 def api_key() -> str:
-    return os.environ.get("ANTHROPIC_API_KEY") or load().get("anthropic_api_key", "")
+    return api_key_from_env() or load().get("anthropic_api_key", "")
 
 
 def model() -> str:

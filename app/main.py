@@ -226,7 +226,7 @@ def get_settings():
     key = settings.api_key()
     return {"model": s["model"], "tone": s["tone"], "crf": s["crf"], "preset": s["preset"],
             "api_key_set": bool(key), "api_key_hint": (key[:7] + "…" + key[-4:]) if len(key) > 12 else "",
-            "api_key_from_env": bool(os.environ.get("ANTHROPIC_API_KEY"))}
+            "api_key_from_env": bool(settings.api_key_from_env())}
 
 
 @app.post("/api/settings")

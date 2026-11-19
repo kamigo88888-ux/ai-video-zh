@@ -1,6 +1,6 @@
 """Offline pipeline test: detect -> (manual translations) -> layout -> render, then verify output."""
 import sys, time, json, subprocess
-sys.path.insert(0, '/home/user/subtitle-zh')
+sys.path.insert(0, str(__import__('pathlib').Path(__file__).resolve().parent.parent))
 from app.video import probe
 from app.detect import analyze
 from app.layout import build_layout, DEFAULT_STYLE
